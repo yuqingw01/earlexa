@@ -29,6 +29,36 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
                 'text': reprompt_text
             }
         },
+        'audio': {
+              'type': 'SSML',
+              'ssml': """<speak>
+                      The audio will start,
+                      <audio src="soundbank://soundlibrary/animals/amzn_sfx_bear_groan_roar_01" />
+                      </speak>"""
+            },
+        'shouldEndSession': should_end_session
+    }
+    
+def build_audiospeechlet_response(title, output, reprompt_text, should_end_session):
+    return {
+        'outputSpeech': {
+            'type': 'SSML',
+            'ssml': """<speak>
+                      The audio will start,
+                      <audio src="soundbank://soundlibrary/animals/amzn_sfx_bear_groan_roar_01" />
+                      </speak>"""
+        },
+        'card': {
+            'type': 'Simple',
+            'title': "SessionSpeechlet - " + title,
+            'content': "SessionSpeechlet - " + output
+        },
+        'reprompt': {
+            'outputSpeech': {
+                'type': 'PlainText',
+                'text': reprompt_text
+            }
+        },
         'shouldEndSession': should_end_session
     }
 
@@ -50,23 +80,11 @@ def get_welcome_response():
 
     session_attributes = {}
     card_title = "Welcome"
-    """
+
     speech_output = "Welcome to the Hearing Test" \
                     "Please tell me which test you want to choose" \
                     "You can choose from speech test, pure-tone audiometry, or freqency test"
-    """
-    
-    speech_output = """{
-         "response": {
-            "outputSpeech": {
-              "type": "SSML",
-              "ssml": "<speak>
-                      Welcome to Car-Fu.
-                      <audio src="https://carfu.com/audio/carfu-welcome.mp3" />
-                      You can order a ride, or request a fare estimate. Which will it be?
-                      </speak>"
-            }
-        }"""
+
     
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
@@ -83,6 +101,12 @@ def handle_session_end_request():
     # Setting this to true ends the session and exits the skill.
     should_end_session = True
     return build_response({}, build_speechlet_response(
+        card_title, speech_output, None, should_end_session))
+        
+def play_audio_response():
+    card_title = "Play Audio"
+    should_end_session = False
+    return build_response({}, build_audiospeechlet_response(
         card_title, speech_output, None, should_end_session))
 
 """
@@ -180,6 +204,8 @@ def on_intent(intent_request, session):
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
+    elif intent_name == "test":
+        return play_audio_response()
     else:
         raise ValueError("Invalid intent")
 
