@@ -29,6 +29,13 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
                 'text': reprompt_text
             }
         },
+        'audio': {
+              'type': 'SSML',
+              'ssml': """<speak>
+                      The audio will start,
+                      <audio src="soundbank://soundlibrary/animals/amzn_sfx_bear_groan_roar_01" />
+                      </speak>"""
+            },
         'shouldEndSession': should_end_session
     }
 
@@ -50,23 +57,11 @@ def get_welcome_response():
 
     session_attributes = {}
     card_title = "Welcome"
-    """
+
     speech_output = "Welcome to the Hearing Test" \
                     "Please tell me which test you want to choose" \
                     "You can choose from speech test, pure-tone audiometry, or freqency test"
-    """
-    
-    speech_output = """{
-         "response": {
-            "outputSpeech": {
-              "type": "SSML",
-              "ssml": "<speak>
-                      Welcome to Car-Fu.
-                      <audio src="https://carfu.com/audio/carfu-welcome.mp3" />
-                      You can order a ride, or request a fare estimate. Which will it be?
-                      </speak>"
-            }
-        }"""
+
     
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
