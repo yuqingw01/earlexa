@@ -67,7 +67,7 @@ def get_welcome_response():
                       </speak>"
             }
         }"""
-    c 
+    
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
     reprompt_text = "Please choose one from speech test, pure-tone audiometry, or freqency test" 
