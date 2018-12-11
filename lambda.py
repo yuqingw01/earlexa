@@ -12,6 +12,9 @@ from __future__ import print_function
 
 # --------------- Helpers that build all of the responses ----------------------
 
+counter = 1
+heardcount = 0
+
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
     return {
         'outputSpeech': {
@@ -22,6 +25,21 @@ def build_speechlet_response(title, output, reprompt_text, should_end_session):
             'type': 'Simple',
             'title': "SessionSpeechlet - " + title,
             'content': "SessionSpeechlet - " + output
+        },
+        'reprompt': {
+            'outputSpeech': {
+                'type': 'PlainText',
+                'text': reprompt_text
+            }
+        },
+        'shouldEndSession': should_end_session
+    }
+    
+def build_audiospeechlet_response(title, audioresponse, reprompt_text, should_end_session):
+    return {
+        'outputSpeech': {
+            'type': 'SSML',
+            'ssml': audioresponse
         },
         'reprompt': {
             'outputSpeech': {
@@ -50,23 +68,12 @@ def get_welcome_response():
 
     session_attributes = {}
     card_title = "Welcome"
-    """
-    speech_output = "Welcome to the Hearing Test" \
-                    "Please tell me which test you want to choose" \
-                    "You can choose from speech test, pure-tone audiometry, or freqency test"
-    """
-    
-    speech_output = """{
-         "response": {
-            "outputSpeech": {
-              "type": "SSML",
-              "ssml": "<speak>
-                      Welcome to Car-Fu.
-                      <audio src="https://carfu.com/audio/carfu-welcome.mp3" />
-                      You can order a ride, or request a fare estimate. Which will it be?
-                      </speak>"
-            }
-        }"""
+
+    speech_output = "Welcome to the Hearing Test. " \
+                    "I will play a few tones for you. " \
+                    "you will need to respond after each tone if you hear it.          " \
+                    "Now, please respond yes when you are ready"
+
     
     # If the user either does not reply to the welcome message or says something
     # that is not understood, they will be prompted again with this text.
@@ -78,12 +85,107 @@ def get_welcome_response():
 
 def handle_session_end_request():
     card_title = "Session Ended"
-    speech_output = "Thank you for trying the Hearing Test sample. " \
+    speech_output = "Thank you for trying the Hearing Test. " \
                     "Have a nice day! "
     # Setting this to true ends the session and exits the skill.
     should_end_session = True
     return build_response({}, build_speechlet_response(
         card_title, speech_output, None, should_end_session))
+        
+def play_audio_response(intent, session):
+    global counter
+    global heardcount
+    if counter == 1:
+        card_title = "Play Audio"
+        audioresponse = '''<speak>
+          The first tone will start,
+          <audio src="https://www.jovo.tech/audio/GbnRxwFc-wavtonescomunregistredsin-125hz-8dbfs-3s.mp3" />
+          Did you hear that?
+          </speak>'''
+        should_end_session = False
+        counter += 1
+        return build_response({}, build_audiospeechlet_response(
+        card_title, audioresponse, None, should_end_session))
+        
+    if counter == 2:
+        card_title = "Play Audio"
+        print (intent)
+        userresponse = intent['slots']['HearingTest']['value']
+
+        if userresponse == 'yes':
+            heardcount += 1
+ 
+        
+        audioresponse = '''<speak>
+
+          The second tone will start,
+          <audio src="https://www.jovo.tech/audio/baoI1dfl-wavtonescomunregistredsin-250hz-8dbfs-3s.mp3" />
+          Did you hear that?
+          </speak>'''
+        should_end_session = False
+        counter += 1
+        return build_response({}, build_audiospeechlet_response(
+        card_title, audioresponse, None, should_end_session))
+    
+    if counter == 3:
+        card_title = "Play Audio"
+        userresponse = intent['slots']['HearingTest']['value']
+
+        if userresponse == 'yes':
+            heardcount += 1
+        audioresponse = '''<speak>
+          The third tone will start,
+          <audio src="https://www.jovo.tech/audio/29UF9w95-wavtonescomunregistredsin-1000hz-8dbfs-3s.mp3" />
+          Did you hear that?
+          </speak>'''
+        should_end_session = False
+        counter += 1
+        return build_response({}, build_audiospeechlet_response(
+        card_title, audioresponse, None, should_end_session))
+    
+    if counter == 4:
+        card_title = "Play Audio"
+        userresponse = intent['slots']['HearingTest']['value']
+
+        if userresponse == 'yes':
+            heardcount += 1
+        audioresponse = '''<speak>
+          The fourth tone will start,
+          <audio src="https://www.jovo.tech/audio/saSitFuL-wavtonescomunregistredsin-2000hz-8dbfs-3s.mp3" />
+          Did you hear that?
+          </speak>'''
+        should_end_session = False
+        counter += 1
+        return build_response({}, build_audiospeechlet_response(
+        card_title, audioresponse, None, should_end_session))
+    
+    if counter == 5:
+        card_title = "Play Audio"
+        userresponse = intent['slots']['HearingTest']['value']
+
+        if userresponse == 'yes':
+            heardcount += 1
+        
+        
+        audioresponse = '''<speak>
+          You have heard the tones '''+str(heardcount)+''' out of 4 times,
+          Thank you for trying the Hearing Test, have a nice day! 
+          </speak>'''
+        should_end_session = True
+        return build_response({}, build_audiospeechlet_response(
+        card_title, audioresponse, None, should_end_session))
+        
+    else: 
+        card_title = "Play Audio"
+        audioresponse = '''<speak>
+          Thank you for trying the Hearing Test sample, have a nice day! 
+          </speak>'''
+        should_end_session = True
+        counter = 0
+        return build_response({}, build_audiospeechlet_response(
+        card_title, audioresponse, None, should_end_session))
+    
+
 
 """
 def create_favorite_color_attributes(favorite_color):
@@ -93,10 +195,9 @@ def create_favorite_color_attributes(favorite_color):
 def create_testtype_attributes(testtype):
     return {"TestType": testtype}
 
+"""
 def set_color_in_session(intent, session):
-    """ Sets the color in the session and prepares the speech to reply to the
-    user.
-    """
+
 
     card_title = intent['name']
     session_attributes = {}
@@ -119,8 +220,9 @@ def set_color_in_session(intent, session):
                         "my favorite color is red."
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
+"""
 
-
+"""
 def get_color_from_session(intent, session):
     session_attributes = {}
     reprompt_text = None
@@ -140,7 +242,7 @@ def get_color_from_session(intent, session):
     # understood, the session will end.
     return build_response(session_attributes, build_speechlet_response(
         intent['name'], speech_output, reprompt_text, should_end_session))
-
+"""
 
 # --------------- Events ------------------
 
@@ -158,6 +260,10 @@ def on_launch(launch_request, session):
 
     print("on_launch requestId=" + launch_request['requestId'] +
           ", sessionId=" + session['sessionId'])
+    global counter
+    global heardcount
+    heardcount =0
+    counter = 1
     # Dispatch to your skill's launch
     return get_welcome_response()
 
@@ -172,6 +278,7 @@ def on_intent(intent_request, session):
     intent_name = intent_request['intent']['name']
 
     # Dispatch to your skill's intent handlers
+    """
     if intent_name == "MyColorIsIntent":
         return set_color_in_session(intent, session)
     elif intent_name == "WhatsMyColorIntent":
@@ -180,6 +287,9 @@ def on_intent(intent_request, session):
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
+    """
+    if intent_name == "alexahearing":
+        return play_audio_response(intent, session)
     else:
         raise ValueError("Invalid intent")
 
